@@ -1,12 +1,23 @@
 {
   "name": "Adhan",
   "short_name": "Adhan",
-  "start_url": ".",
+  "start_url": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay"],
   "background_color": "#ffffff",
   "theme_color": "#28a745",
   "orientation": "portrait",
   "description": "Islamic Tools app for Prayer Times, Qibla Finder, and Adhan alerts.",
-
-  ]
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "pingwing.com.png"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "auto"
+  },
+  "scope": "/"
 }
