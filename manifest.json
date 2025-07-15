@@ -14,8 +14,8 @@
   "screenshots": [
     {
       "src": "https://pngwing.com.png",
-      "sizes": "212x212",
-      "type": "image/png"
+      "sizes": "512x512",
+      "type": "screenshots/png"
     }
   ],
   "launch_handler": {
@@ -32,7 +32,7 @@
     {
       "src": "https://mutech23.github.io/islamic-tools/pngwing.com.png",
       "sizes": "540x720",
-      "type": "image/png"
+      "type": "screenshots/png"
     }
   ],
   "file_handlers": [
