@@ -11,9 +11,9 @@
   "description": "Islamic Tools app for Prayer Times, Qibla Finder, and Adhan alerts.",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "pingwing.com.png",
       "sizes": "512x512",
-      "type": "pingwing.com.png"
+      "type": "image/png"
     }
   ],
   "launch_handler": {
