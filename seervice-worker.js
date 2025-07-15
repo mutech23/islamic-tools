@@ -7,7 +7,7 @@ self.addEventListener('install', event => {
         '/index.html',
         '/manifest.json',
         '/service-worker.js',
-        '/icon-512.png',
+       
         // Add more files if needed (e.g. CSS, JS)
       ]);
     })
