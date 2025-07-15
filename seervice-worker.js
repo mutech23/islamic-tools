@@ -7,6 +7,7 @@ self.addEventListener('install', event => {
         '/index.html',
         '/manifest.json',
         '/service-worker.js',
+        '/pngwing.com.png',
        
         // Add more files if needed (e.g. CSS, JS)
       ]);
