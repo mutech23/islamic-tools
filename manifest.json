@@ -11,7 +11,7 @@
   "description": "Islamic Tools app for Prayer Times, Qibla Finder, and Adhan alerts.",
   "icons": [
     {
-      "src": "pingwing.com.png",
+      "src": "https://pingwing.com.pngegg.com/512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -19,5 +19,40 @@
   "launch_handler": {
     "client_mode": "auto"
   },
-  "scope": "/"
+  "scope": "/",
+
+  "categories": ["utilities", "religion", "productivity"],
+  "iarc_rating_id": "eC000000",
+  "screenshots": [
+    {
+      "src": "https://mutech23.github.io/islamic-tools/pngwing.com.png",
+      "sizes": "540x720",
+      "type": "image/png"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/open-file",
+      "accept": {
+        "application/json": [".json"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+adhan",
+      "url": "/?q=%s"
+    }
+  ],
+  "handle_links": "preferred"
 }
