@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" class="transition-colors duration-300">
+<head>
+  <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-512.png">
+<meta name="theme-color" content="#28a745">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Islamic Tools</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').then(() => {
+      console.log('✅ Service Worker Registered');
+    }).catch(err => {
+      console.log('❌ Service Worker failed:', err);
+    });
+  }
+</script>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen">
+
+  <div class="container mx-auto p-6">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-extrabold money-text gold-text">🕌 Islamic Tools</h1>
+      <button id="toggle-dark" class="mt-4 px-4 py-2 rounded money-color text-white shadow hover:shadow-lg transition">
+        Toggle Dark Mode
+      </button>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Prayer Times -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-black dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold gold-text mb-4">🕋 Prayer Times</h2>
+          <p id="location-display" class="font-semibold mb-4">Location: —</p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-4">
+            <select id="calculation-method" class="p-2 border rounded">
+              <option value="0">Muslim World League</option>
+              <option value="1">ISNA</option>
+              <option value="2">Egyptian</option>
+              <option value="3">Umm Al-Qura</option>
+              <option value="4">Karachi</option>
+            </select>
+            <select id="asr-method" class="p-2 border rounded">
+              <option value="0">Shafi’i</option>
+              <option value="1">Hanafi</option>
+            </select>
+            <input id="date-selector" type="date" class="datepicker p-2 border rounded"/>
+          </div>
+          <div id="prayer-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- Hijri Calendar -->
+        <div class="bg-black color-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold gold-text mb-4">📅 Islamic Calendar</h2>
+          <div class="flex space-x-4 justify-center items-center mb-3">
+            <button id="prev-month" class="px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h3 id="current-gregorian" class="font-medium"></h3>
+            <button id="next-month" class="px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+          <div id="calendar-grid" class="grid grid-cols-7 gap-2 text-center text-sm">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div class="mt-4 text-center">
+            <p id="today-hijri" class="italic"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Qibla Compass -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg sticky top-8">
+        <h2 class="text-2xl font-bold gold-text mb-4">🧭 Qibla Finder</h2>
+        <div class="flex justify-center mb-4">
+          <div class="relative w-48 h-48 border rounded-full bg-gray-100 dark:bg-gray-700">
+            <div id="needle" class="absolute top-1/2 left-1/2 w-1 h-1/2 bg-red-600 origin-bottom"></div>
+            <div class="absolute top-0 left-1/2 transform -translate-x-1/2">N</div>
+            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2">S</div>
+            <div class="absolute left-0 top-1/2 transform -translate-y-1/2">W</div>
+            <div class="absolute right-0 top-1/2 transform -translate-y-1/2">E</div>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <input id="city-input" class="p-2 border rounded w-full" placeholder="Enter city, e.g. Cairo"/>
+          <button id="locate-city" class="money-color px-4 py-2 rounded text-white w-full hover:bg-green-600 transition">
+            Find City Qibla
+          </button>
+          <button id="use-my-location" class="mt-2 bg-green-600 px-4 py-2 rounded text-white w-full hover:bg-indigo-700 transition">
+            Use My GPS Location
+          </button>
+        </div>
+        <p id="qibla-angle" class="mt-4 text-center font-semibold"></p>
+      </div>
+    </div>
+  </div>
+
+  <audio id="adhan" src="https://download.quranicaudio.com/quran/azan/azan1.mp3"></audio>
+
+  <script>
+    // Dark mode
+    const root = document.documentElement;
+    const toggle = document.getElementById('toggle-dark');
+    if (localStorage.theme === 'dark') root.classList.add('dark');
+    toggle.onclick = () => {
+      root.classList.toggle('dark');
+      localStorage.theme = root.classList.contains('dark') ? 'dark' : 'light';
+    };
+
+    // Globals
+    let userLat, userLng;
+    const prayerArray = [];
+    const displayLoc = document.getElementById('location-display');
+    const prayerGrid = document.getElementById('prayer-grid');
+    const dateSel = document.getElementById('date-selector');
+    const methSel = document.getElementById('calculation-method');
+    const asrSel = document.getElementById('asr-method');
+    const adhan = document.getElementById('adhan');
+    const needle = document.getElementById('needle');
+    const qiblaDisplay = document.getElementById('qibla-angle');
+    const cfg = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' });
+    const gCheck = document.getElementById('current-gregorian');
+    const calGrid = document.getElementById('calendar-grid');
+    const todayHijri = document.getElementById('today-hijri');
+    const cityInput = document.getElementById('city-input');
+    const locateCity = document.getElementById('locate-city');
+    const myLoc = document.getElementById('use-my-location');
+
+    // Date init
+    let currentCal = new Date();
+    dateSel.valueAsDate = currentCal;
+    renderCalendar();
+    methSel.onchange = updatePrayer;
+    asrSel.onchange = updatePrayer;
+    dateSel.onchange = updatePrayer;
+    locateCity.onclick = cityGeocode;
+    myLoc.onclick = useGPS;
+
+    async function useGPS(){
+      if(!navigator.geolocation) return alert('No geolocation');
+      navigator.geolocation.getCurrentPosition(async pos => {
+        [userLat, userLng] = [pos.coords.latitude, pos.coords.longitude];
+        displayLoc.textContent = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`;
+        updatePrayer();
+        calcQibla();
+        watchCompass();
+      }, _=>alert('Permission denied'));
+    }
+
+    async function cityGeocode(){
+      const city = cityInput.value.trim();
+      if(!city) return alert('Enter city');
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(city)}`);
+      const js = await res.json();
+      if(!js.length) return alert('City not found');
+      userLat = parseFloat(js[0].lat);
+      userLng = parseFloat(js[0].lon);
+      displayLoc.textContent = `Lat: ${userLat.toFixed(4)}, Lng: ${userLng.toFixed(4)}`;
+      updatePrayer();
+      calcQibla();
+      watchCompass();
+    }
+
+    async function updatePrayer(){
+      if(!userLat) return;
+      const ts = Math.floor(new Date(dateSel.value).getTime()/1000);
+      const r = await fetch(`https://api.aladhan.com/v1/timings/${ts}?latitude=${userLat}&longitude=${userLng}&method=${methSel.value}&school=${asrSel.value}`);
+      const t = (await r.json()).data.timings;
+      prayerGrid.innerHTML = '';
+      prayerArray.splice(0);
+      ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(n=>{
+        prayerArray.push({n, v: t[n]});
+        const div = document.createElement('div');
+        div.className= "bg-gray-100 dark:bg-gray-700 p-4 rounded text-center relative";
+        div.innerHTML = `<h3 class="font-semibold">${n}</h3><p class="money-text text-xl">${t[n]}</p>`;
+        prayerGrid.append(div);
+      });
+    }
+
+    setInterval(()=>{
+      const now = new Date().toLocaleTimeString('en-GB',{hour12:false,hour:'2-digit',minute:'2-digit'});
+      prayerArray.forEach(p=>{
+        if(p.v === now){
+          adhan.play().catch(_=>{});
+          document.querySelectorAll('#prayer-grid div').forEach(el=>{
+            if(el.innerText.includes(now)) {
+              el.classList.add('prayer-glow');
+              setTimeout(()=>el.classList.remove('prayer-glow'), 5000);
+            }
+          });
+        }
+      });
+    },60000);
+
+    function calcQibla(){
+      const φ1=toRad(userLat), φ2=toRad(21.3891);
+      const dLng=toRad(39.8579)-toRad(userLng);
+      const y = Math.sin(dLng)*Math.cos(φ2);
+      const x = Math.cos(φ1)*Math.sin(φ2)-Math.sin(φ1)*Math.cos(φ2)*Math.cos(dLng);
+      const brng=(toDeg(Math.atan2(y,x))+360)%360;
+      qiblaDisplay.textContent = `Qibla: ${brng.toFixed(1)}°`;
+      needle.style.transform = `rotate(${brng}deg)`;
+    }
+
+    function watchCompass(){
+      if(!window.DeviceOrientationEvent) return;
+      window.addEventListener('deviceorientationabsolute', e=>{
+        if(e.alpha==null) return;
+        const deg = parseFloat(qiblaDisplay.textContent.split(' ')[1]);
+        const shift = (deg - e.alpha + 360)%360;
+        needle.style.transform = `rotate(${shift}deg)`;
+      });
+    }
+
+    function renderCalendar(){
+      gCheck.textContent = cfg.format(currentCal);
+      calGrid.querySelectorAll('.day').forEach(d=>d.remove());
+      const fd = new Date(currentCal.getFullYear(), currentCal.getMonth(),1).getDay();
+      const days = new Date(currentCal.getFullYear(), currentCal.getMonth()+1,0).getDate();
+      for(let i=0;i<fd;i++) calGrid.append(document.createElement('div'));
+      for(let d=1;d<=days;d++){
+        const el=document.createElement('div');
+        el.textContent=d;
+        el.className=`day py-1 rounded ${d===new Date().getDate()&&currentCal.getMonth()===new Date().getMonth()?'bg-green-200 dark:bg-gray-700 font-semibold':''}`;
+        calGrid.append(el);
+      }
+      const hi = new Intl.DateTimeFormat('en-TN-u-ca-islamic', {day:'numeric', month:'long', year:'numeric'});
+      todayHijri.textContent = `Today: ${hi.format(new Date())}`;
+    }
+
+    document.getElementById('prev-month').onclick=()=>{
+      currentCal.setMonth(currentCal.getMonth()-1);
+      renderCalendar();
+    }
+    document.getElementById('next-month').onclick=()=>{
+      currentCal.setMonth(currentCal.getMonth()+1);
+      renderCalendar();
+    }
+
+    function toRad(d){return d*Math.PI/180;}
+    function toDeg(r){return r*180/Math.PI;}
+  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').then(() => {
+      console.log('Service Worker Registered');
+    });
+  }
+</script>
+<style>
+    .money-color { background-color: #28a745; }
+    .money-text { color: #28a745; }
+    .gold-text { color: #daa520; }
+    .prayer-glow {
+    }
+    #needle {
+      transition: transform 1s ease-out;
+    }
+    .datepicker::-webkit-calendar-picker-indicator {
+      filter: invert(0.5);
+    }
+  </style>
+
+</body>
+</html>
