@@ -4,7 +4,9 @@
   "start_url": "/",
   "id": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay"],
+  "display_override": [
+    "window-controls-overlay"
+  ],
   "background_color": "#ffffff",
   "theme_color": "#28a745",
   "orientation": "portrait",
@@ -12,16 +14,19 @@
   "icons": [
     {
       "src": "https://pngwing.com.png",
-      "sizes": "212x212",
-      "type": "icon/png"
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
   "launch_handler": {
     "client_mode": "auto"
   },
   "scope": "/",
-
-  "categories": ["utilities", "religion", "productivity"],
+  "categories": [
+    "utilities",
+    "religion",
+    "productivity"
+  ],
   "iarc_rating_id": "eC000000",
   "screenshots": [
     {
@@ -34,7 +39,9 @@
     {
       "action": "/open-file",
       "accept": {
-        "application/json": [".json"]
+        "application/json": [
+          ".json"
+        ]
       }
     }
   ],
