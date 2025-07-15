@@ -11,7 +11,7 @@
   "theme_color": "#28a745",
   "orientation": "portrait",
   "description": "Islamic Tools app for Prayer Times, Qibla Finder, and Adhan alerts.",
-  "icons": [
+  "screenshots": [
     {
       "src": "https://pngwing.com.png",
       "sizes": "512x512",
