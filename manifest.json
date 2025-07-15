@@ -12,8 +12,8 @@
   "icons": [
     {
       "src": "https://pngwing.com.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "sizes": "212x212",
+      "type": "icon/png"
     }
   ],
   "launch_handler": {
